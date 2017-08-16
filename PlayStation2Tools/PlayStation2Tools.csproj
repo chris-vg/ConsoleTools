@@ -118,6 +118,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RenamePS2InstalledGame.cs" />
     <Compile Include="GetPS2GameInfo.cs" />
     <Compile Include="Model\GiantBombGameRegion.cs" />
     <Compile Include="Model\GiantBombReleasesItem.cs" />
