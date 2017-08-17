@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using PlayStation2Tools.Model;
 
 namespace PlayStation2Tools.Resources
@@ -129,9 +130,9 @@ namespace PlayStation2Tools.Resources
             var output = p.StandardOutput.ReadToEnd();
 
             p.WaitForExit();
-            while (!p.HasExited)
+            while (!p.HasExited && p.Responding)
             {
-                // wait
+                Thread.Sleep(100);
             }
 
             const string pattern = @"^""([A-Z0-9_.]+){1}""\s""(.*){1}""\s([a-z ]+){0,1}\s*(?:([0-9]+)KB)";

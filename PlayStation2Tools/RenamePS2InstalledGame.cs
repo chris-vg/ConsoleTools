@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Security.Principal;
+using System.Threading;
 using Microsoft.PowerShell.Commands;
 using PlayStation2Tools.Model;
 using PlayStation2Tools.Resources;
@@ -46,12 +48,20 @@ namespace PlayStation2Tools
         private const string ParamSetLiteral = "Literal";
         private const string ParamSetPath = "Path";
         private bool _shouldExpandWildcards;
-        private List<HdlTocItem> _hdlToc;
+        private List<HdlTocItem> _hdlTocList;
+        private List<Ps2Game> _ps2GameList;
+        private int _filesTotal;
+        private int _fileCounter;
 
         protected override void BeginProcessing()
         {
             ValidateAdmin();
             GetHdlTocDetails();
+
+            _filesTotal = 0;
+            _fileCounter = 0;
+
+            _ps2GameList = new List<Ps2Game>();
         }
 
         protected override void ProcessRecord()
@@ -78,6 +88,84 @@ namespace PlayStation2Tools
             }
 
             // todo: compare hdltoc and cdvdinfo for matches
+            var discImageMatches = 0;
+            foreach (var installedGame in _hdlTocList.ToArray())
+            {
+                var progressPercent = Convert.ToInt32((double)discImageMatches / _hdlTocList.Count * 100);
+                var progressRecord = new ProgressRecord(1,
+                        $"Finding match for '{installedGame.Startup}'",
+                        $"{discImageMatches}/{_hdlTocList.Count}")
+                    { PercentComplete = progressPercent };
+                WriteProgress(progressRecord);
+
+                foreach (var discImage in _ps2GameList.ToArray())
+                {
+                    if (discImage.CdvdInfo.Signature == installedGame.Startup)
+                    {
+                        discImage.GiantBombInfo = new Resources.GiantBomb(discImage.RedumpInfo);
+
+                        string title;
+                        if (discImage.GiantBombInfo.ReleaseDetails.Name != null)
+                        {
+                            title = discImage.GiantBombInfo.ReleaseDetails.Name;
+                        }
+                        else if (discImage.GiantBombInfo.GameDetails.Name != null)
+                        {
+                            title = discImage.GiantBombInfo.GameDetails.Name;
+                        }
+                        else
+                        {
+                            title = discImage.RedumpInfo.RedumpFullName;
+                        }
+
+                        if (discImage.RedumpInfo.Region.Length > 0)
+                        {
+                            string region = null;
+                            for (var i = 0; i < discImage.RedumpInfo.Region.Length; i++)
+                            {
+                                region += discImage.RedumpInfo.Region[i];
+                                if (i < discImage.RedumpInfo.Region.Length - 1) region += ", ";
+                            }
+                            title += $" ({region})";
+                        }
+
+                        if (discImage.RedumpInfo.Other != null && discImage.RedumpInfo.Other.Length > 0)
+                        {
+                            string disc = null;
+                            foreach (var other in discImage.RedumpInfo.Other)
+                            {
+                                if (other.StartsWith("Disc ") && disc == null) disc = $" ({other})";
+                            }
+                            title += disc;
+                        }
+                        discImage.InstallTitle = title;
+
+                        var hdlDump = new HdlDump();
+
+                        hdlDump.SetTarget(Target.HardDrive);
+
+                        var p = new Process
+                        {
+                            StartInfo =
+                            {
+                                FileName = hdlDump.Path,
+                                Arguments = $"modify {hdlDump.Target} \"{installedGame.Name}\" \"{discImage.InstallTitle}\"",
+                                UseShellExecute = false,
+                                RedirectStandardOutput = true
+                            }
+                        };
+                        p.Start();
+
+                        p.WaitForExit();
+                        while (!p.HasExited && p.Responding)
+                        {
+                            Thread.Sleep(100);
+                        }
+                        discImageMatches++;
+                        break;
+                    }
+                }
+            }
         }
 
         protected override void StopProcessing()
@@ -106,7 +194,7 @@ namespace PlayStation2Tools
         {
             var hdlDump = new HdlDump();
             hdlDump.SetTarget(Target.HardDrive);
-            _hdlToc = hdlDump.GetHdlToc();
+            _hdlTocList = hdlDump.GetHdlToc();
         }
 
         // private methods
@@ -114,6 +202,8 @@ namespace PlayStation2Tools
         {
             if (IsValidFile(file))
             {
+                _filesTotal = 1;
+                _fileCounter = 1;
                 ProcessGameFromFile(file);
             }
             else
@@ -130,6 +220,14 @@ namespace PlayStation2Tools
         private void ProcessDirectory(DirectoryInfo dir)
         {
             var files = dir.GetFiles().OrderBy(f => f.Name);
+            _filesTotal = 0;
+            _fileCounter = 1;
+            foreach (var file in files)
+            {
+                if (!IsValidFile(file)) continue;
+                _filesTotal++;
+            }
+
             foreach (var file in files)
             {
                 if (!IsValidFile(file)) continue;
@@ -139,7 +237,23 @@ namespace PlayStation2Tools
 
         private void ProcessGameFromFile(FileSystemInfo file)
         {
-            // todo: get cdvdinfo
+            var progressPercent = Convert.ToInt32((double)_fileCounter / _filesTotal * 100);
+            var progressRecord = new ProgressRecord(1,
+                    $"Parsing PlayStation 2 disc image '{file.Name}'",
+                    $"{_fileCounter}/{_filesTotal}")
+                { PercentComplete = progressPercent };
+            WriteProgress(progressRecord);
+
+            var ps2Game = new Ps2Game();
+            var hdlDump = new HdlDump();
+
+            ps2Game.File = file;
+            ps2Game.CdvdInfo = hdlDump.GetCdvdInfo(ps2Game.File);
+            ps2Game.RedumpInfo = new RedumpInfo(ps2Game.CdvdInfo, ps2Game.File);
+            ps2Game.IsRedump = ps2Game.RedumpInfo.IsRedump();
+
+            _ps2GameList.Add(ps2Game);
+            _fileCounter++;
         }
 
         private static bool IsValidFile(FileSystemInfo file)

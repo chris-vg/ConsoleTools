@@ -6,16 +6,20 @@ namespace PlayStation2Tools.Resources
 {
     public class Ps2Game
     {
-        public bool IsRedump { get; }
-        public CdvdInfo CdvdInfo { get; }
-        public RedumpInfo RedumpInfo { get; }
-        public GiantBomb GiantBombInfo { get; }
-        public FileSystemInfo File { get; }
+        public bool IsRedump { get; set; }
+        public CdvdInfo CdvdInfo { get; set; }
+        public RedumpInfo RedumpInfo { get; set; }
+        public GiantBomb GiantBombInfo { get; set; }
+        public FileSystemInfo File { get; set; }
         public Source Source { get; }
-        public string InstallTitle { get; }
+        public string InstallTitle { get; set; }
         public int Count { get; set; }
         public int Id { get; set; }
 
+
+        public Ps2Game()
+        {
+        }
 
         public Ps2Game(FileSystemInfo file)
         {
