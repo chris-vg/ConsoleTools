@@ -23,6 +23,13 @@ namespace PlayStation2Tools
         Mode8 = 128
     }
 
+    public enum Device
+    {
+        HDD = 1,
+        SMB = 2,
+        USB = 3
+    }
+
     [Cmdlet(VerbsCommon.New, "PS2GameConfig")]
     public class NewPs2GameConfig : PSCmdlet
     {
@@ -43,6 +50,11 @@ namespace PlayStation2Tools
         [ValidateNotNullOrEmpty]
         public Ps2Game Ps2Game { get; set; }
 
+        [Parameter(Mandatory = true)]
+        [ValidateNotNullOrEmpty]
+        [ValidateSet("HDD", "SMB", "USB", IgnoreCase = true)]
+        public Device Device { get; set; }
+
         [Parameter()]
         public SwitchParameter PassThru { get; set; }
 
@@ -55,7 +67,7 @@ namespace PlayStation2Tools
         protected override void ProcessRecord()
         {
             ValidatePs2Game();
-            CreateConfigFile(GetConfigFromOplCl(Ps2Game.CdvdInfo.Signature));
+            CreateConfigFile(GetConfigFromOplCl(Ps2Game.CdvdInfo.Signature, Device));
         }
 
         protected override void StopProcessing()
@@ -91,11 +103,11 @@ namespace PlayStation2Tools
         }
 
         // private methods
-        private static Dictionary<string, string> GetConfigFromOplCl(string signature)
+        private static Dictionary<string, string> GetConfigFromOplCl(string signature, Device device)
         {
             var configDict = new Dictionary<string, string>();
             var web = new WebClient();
-            var remoteUri = new Uri($"http://sx.sytes.net/oplcl/config.ashx?code={signature}&device=1");
+            var remoteUri = new Uri($"http://sx.sytes.net/oplcl/config.ashx?code={signature}&device={Convert.ToInt32(device)}");
             string configData = null;
             try
             {

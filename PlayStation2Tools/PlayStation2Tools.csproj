@@ -124,6 +124,7 @@
     <Compile Include="Model\GiantBombReleasesItem.cs" />
     <Compile Include="Model\GiantBombSearchItem.cs" />
     <Compile Include="Model\HdlTocItem.cs" />
+    <Compile Include="RenamePS2ISOFile.cs" />
     <Compile Include="Resources\GiantBombReleaseDetails.cs" />
     <Compile Include="Resources\GiantBombGameDetails.cs" />
     <Compile Include="Resources\GiantBombReleases.cs" />
