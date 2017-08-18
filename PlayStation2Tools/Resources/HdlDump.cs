@@ -115,25 +115,23 @@ namespace PlayStation2Tools.Resources
 
         public CdvdInfo GetCdvdInfo(FileSystemInfo file)
         {
-            var p = new Process
+            var pStartInfo = new ProcessStartInfo
             {
-                StartInfo =
-                {
-                    FileName = Path,
-                    Arguments = $"cdvd_info \"{file.FullName}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                }
+                FileName = Path,
+                Arguments = $"cdvd_info \"{file.FullName}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true
             };
-            p.Start();
+            var p = Process.Start(pStartInfo);
 
+            if (p == null) return null;
             var output = p.StandardOutput.ReadToEnd();
 
-            p.WaitForExit();
             while (!p.HasExited && p.Responding)
             {
                 Thread.Sleep(100);
             }
+            p.WaitForExit();
 
             const string pattern = @"^""([A-Z0-9_.]+){1}""\s""(.*){1}""\s([a-z ]+){0,1}\s*(?:([0-9]+)KB)";
 
@@ -146,7 +144,6 @@ namespace PlayStation2Tools.Resources
                     ? matches[0].Groups[3].Value
                     : matches[0].Groups[4].Value)
             };
-
             return cdvdInfo;
         }
 

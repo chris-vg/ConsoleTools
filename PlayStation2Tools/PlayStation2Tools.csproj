@@ -118,6 +118,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\OplFile.cs" />
     <Compile Include="RenamePS2InstalledGame.cs" />
     <Compile Include="GetPS2GameInfo.cs" />
     <Compile Include="Model\GiantBombGameRegion.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Model\GiantBombSearchItem.cs" />
     <Compile Include="Model\HdlTocItem.cs" />
     <Compile Include="RenamePS2ISOFile.cs" />
+    <Compile Include="Resources\BinarySerialization.cs" />
     <Compile Include="Resources\GiantBombReleaseDetails.cs" />
     <Compile Include="Resources\GiantBombGameDetails.cs" />
     <Compile Include="Resources\GiantBombReleases.cs" />

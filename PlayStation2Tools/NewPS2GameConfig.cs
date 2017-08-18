@@ -25,9 +25,9 @@ namespace PlayStation2Tools
 
     public enum Device
     {
-        HDD = 1,
-        SMB = 2,
-        USB = 3
+        Hdd = 1,
+        Smb = 2,
+        Usb = 3
     }
 
     [Cmdlet(VerbsCommon.New, "PS2GameConfig")]
@@ -145,28 +145,145 @@ namespace PlayStation2Tools
             string newConfig = null;
 
             newConfig += "CfgVersion=5\r\n";
-            newConfig += "$ConfigSource=1\r\n";
-
-            if (defaultConfig.ContainsKey("$Compatibility"))
-            {
-                var compatibility = (Compatibility)Convert.ToInt32(defaultConfig["$Compatibility"]);
-                newConfig += $"$Compatibility={defaultConfig["$Compatibility"]}\r\n";
-                newConfig += $"Modes={GetCompatibilityMode(compatibility)}\r\n";
-            }
+            newConfig += "$ConfigSource=2\r\n";
 
             newConfig += GetTitle();
             newConfig += GetDescription();
             newConfig += GetRelease();
             newConfig += GetParental();
-            newConfig += GetPlayers();
-            newConfig += GetAspect();
-
             newConfig += GetNotes();
             newConfig += GetGenre();
             newConfig += GetDeveloper();
             newConfig += GetPublisher();
 
-            newConfig += GetVmode();
+            if (defaultConfig != null)
+            {
+                if (defaultConfig.ContainsKey("#Name"))
+                {
+                    newConfig += $"#Name={defaultConfig["#Name"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$AltStartup"))
+                {
+                    newConfig += $"$AltStartup={defaultConfig["$AltStartup"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("#Region"))
+                {
+                    newConfig += $"#Region={defaultConfig["#Region"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$Compatibility"))
+                {
+                    var compatibility = (Compatibility)Convert.ToInt32(defaultConfig["$Compatibility"]);
+                    newConfig += $"$Compatibility={defaultConfig["$Compatibility"]}\r\n";
+                    newConfig += $"Modes={GetCompatibilityMode(compatibility)}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("Vmode"))
+                {
+                    newConfig += $"Vmode={defaultConfig["Vmode"]}\r\n";
+                }
+                else
+                {
+                    newConfig += GetVmode();
+                }
+
+                if (defaultConfig.ContainsKey("Aspect"))
+                {
+                    newConfig += $"Aspect={defaultConfig["Aspect"]}\r\n";
+                }
+                else
+                {
+                    newConfig += GetAspect();
+                }
+
+                if (defaultConfig.ContainsKey("Players"))
+                {
+                    newConfig += $"Players={defaultConfig["Players"]}\r\n";
+                }
+                else
+                {
+                    newConfig += GetPlayers();
+                }
+
+                if (defaultConfig.ContainsKey("Scan"))
+                {
+                    newConfig += $"Scan={defaultConfig["Scan"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("Device"))
+                {
+                    newConfig += $"Device={defaultConfig["Device"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$EnableGSM"))
+                {
+                    newConfig += $"$EnableGSM={defaultConfig["$EnableGSM"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$GSMSkipVideos"))
+                {
+                    newConfig += $"$GSMSkipVideos={defaultConfig["$GSMSkipVideos"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$GSMXOffset"))
+                {
+                    newConfig += $"$GSMXOffset={defaultConfig["$GSMXOffset"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$GSMYOffset"))
+                {
+                    newConfig += $"$GSMYOffset={defaultConfig["$GSMYOffset"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$GSMVMode"))
+                {
+                    newConfig += $"$GSMVMode={defaultConfig["$GSMVMode"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$VMC"))
+                {
+                    newConfig += $"$VMC={defaultConfig["$VMC"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$VMC_0"))
+                {
+                    newConfig += $"$VMC_0={defaultConfig["$VMC_0"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$VMC_1"))
+                {
+                    newConfig += $"$VMC_1={defaultConfig["$VMC_1"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$DMA"))
+                {
+                    newConfig += $"$DMA={defaultConfig["$DMA"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$DNAS"))
+                {
+                    newConfig += $"$DNAS={defaultConfig["$DNAS"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("$EnableCheat"))
+                {
+                    newConfig += $"$EnableCheat={defaultConfig["$EnableCheat"]}\r\n";
+                }
+
+                if (defaultConfig.ContainsKey("Cheat"))
+                {
+                    newConfig += $"Cheat={defaultConfig["Cheat"]}\r\n";
+                }
+            }
+
+            // #Name
+            // $AltStartup
+            // #Region
+            // $VMC
+            // $DNAS
+            // 
 
             if (!Directory.Exists(Path))
                 Directory.CreateDirectory(Path);
