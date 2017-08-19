@@ -36,6 +36,7 @@ namespace PlayStation2Tools.Resources
 
             GiantBombInfo = new GiantBomb(RedumpInfo);
 
+            // todo: fix king of fighters (gamedetails name is more accurate than release name)
 
             string title;
             if (GiantBombInfo.ReleaseDetails.Name != null)
@@ -49,6 +50,48 @@ namespace PlayStation2Tools.Resources
             else
             {
                 title = RedumpInfo.RedumpFullName;
+            }
+
+            if (title.StartsWith("The "))
+            {
+                if (GiantBombInfo.ReleaseDetails.Name != null || GiantBombInfo.GameDetails.Name != null)
+                {
+                    if (title.Contains(": "))
+                    {
+                        var titleSplit = title.Replace(": ", "|").Split('|');
+                        var titleFirst = $"{titleSplit[0].Remove(0, "The ".Length)}, The";
+                        var titleRest = "";
+                        for (int i = 1; i < titleSplit.Length; i++)
+                        {
+                            titleRest += $"{titleSplit[i]}";
+                            if (i < titleSplit.Length - 1) titleRest += ": ";
+                        }
+                        title = $"{titleFirst}: {titleRest}";
+                    }
+                    else
+                    {
+                        title = $"{title.Remove(0, "The ".Length)}, The";
+                    }
+                }
+                else
+                {
+                    if (title.Contains(" - "))
+                    {
+                        var titleSplit = title.Replace(" - ", "|").Split('|');
+                        var titleFirst = $"{titleSplit[0].Remove(0, "The ".Length)}, The";
+                        var titleRest = "";
+                        for (int i = 1; i < titleSplit.Length; i++)
+                        {
+                            titleRest += $"{titleSplit[i]}";
+                            if (i < titleSplit.Length - 1) titleRest += " - ";
+                        }
+                        title = $"{titleFirst} - {titleRest}";
+                    }
+                    else
+                    {
+                        title = $"{title.Remove(0, "The ".Length)}, The";
+                    }
+                }
             }
 
             if (RedumpInfo.Region.Length > 0)
