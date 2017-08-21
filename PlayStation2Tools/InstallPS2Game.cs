@@ -82,16 +82,15 @@ namespace PlayStation2Tools
                     break;
             }
             InstallGame();
+            if (PassThru) WriteObject(Ps2Game);
         }
 
         protected override void StopProcessing()
         {
-            if (PassThru) WriteObject(Ps2Game);
         }
 
         protected override void EndProcessing()
         {
-            if (PassThru) WriteObject(Ps2Game);
         }
 
         // validation methods

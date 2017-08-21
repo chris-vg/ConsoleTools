@@ -68,16 +68,15 @@ namespace PlayStation2Tools
         {
             ValidatePs2Game();
             CreateConfigFile(GetConfigFromOplCl(Ps2Game.CdvdInfo.Signature, Device));
+            if (PassThru) WriteObject(Ps2Game);
         }
 
         protected override void StopProcessing()
         {
-            if (PassThru) WriteObject(Ps2Game);
         }
 
         protected override void EndProcessing()
         {
-            if (PassThru) WriteObject(Ps2Game);
         }
 
         // validation methods
